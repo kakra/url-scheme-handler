@@ -23,4 +23,4 @@ url-scheme-handler --install subl
 
 This application is provided as-is. Feel free to use at your own risk.
 
-Original author: "Kai Krakow" <hurikhan77+github@gmail.com>
+Original author: [Kai Krakow](mailto:hurikhan77+github@gmail.com)
