@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+
+require 'uri'
+require 'cgi'
+
+class Array
+  def parse
+    empty? ? nil : self[0]
+  end
+end
+
+class Object
+  def ensure
+    raise "Unexpected data: #{inspect}" unless self.is_a? String and self.length > 2
+    self
+  end
+end
+
+class Editor
+  attr_accessor :name
+
+  def initialize name
+    @name = name
+  end
+
+  def launcher_location
+    "#{ENV['HOME']}/.local/share/applications/url-scheme-handler-#{name}.desktop"
+  end
+
+  def open query
+    params = CGI::parse query
+    if cmdline = params['url'].parse
+      cmdline = URI(cmdline).path
+      if line = params['line'].parse
+        cmdline << ":#{line}"
+        if column = params['column'].parse
+          cmdline << ":#{column}"
+        end
+      end
+      exec name, cmdline
+    end
+    raise "Parsing error opening '#{query}"
+  end
+end
+
+case ARGV[0]
+when '--help', '-h'
+  puts <<-USAGE
+Usage: $0 --install <handler> | --uninstall <handler> | --help
+USAGE
+when '--install', '-i'
+  scheme = ARGV[1].ensure
+  File.open(Editor.new(scheme).launcher_location, 'w').write <<-DESKTOP
+[Desktop Entry]
+Type=Application
+Name=URL scheme handler for #{scheme}
+GenericName=URL scheme handler
+Comment=Handle URL scheme #{scheme}://
+MimeType=x-scheme-handler/#{scheme};
+Terminal=false
+NoDisplay=true
+TryExec=#{$0}
+Exec=#{$0} %u
+DESKTOP
+  exit
+when '--uninstall', '-u'
+  scheme = ARGV[1].ensure
+  File.unlink(Editor.new(scheme).launcher_location)
+  exit
+end
+
+ARGV.each do |arg|
+  uri = URI arg
+  case uri.scheme
+  when 'subl'
+    editor = Editor.new 'subl3'
+    editor.send uri.host, uri.query
+  else
+    raise "URL '#{uri}' not supported"
+  end
+end
