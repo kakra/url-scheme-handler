@@ -11,7 +11,7 @@ end
 
 class Object
   def ensure
-    raise "Unexpected data: #{inspect}" unless self.is_a? String and self.length > 2
+    raise ArgumentError, "Unexpected data: #{inspect}" unless self.is_a? String and self.length > 2
     self
   end
 end
@@ -39,7 +39,7 @@ class Editor
       end
       exec name, cmdline
     end
-    raise "Parsing error opening '#{query}"
+    raise ArgumentError, "Parsing error opening '#{query}"
   end
 end
 
@@ -76,6 +76,6 @@ ARGV.each do |arg|
     editor = Editor.new 'subl3'
     editor.send uri.host, uri.query
   else
-    raise "URL '#{uri}' not supported"
+    raise ArgumentError, "URL '#{uri}' not supported"
   end
 end
