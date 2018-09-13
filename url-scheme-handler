@@ -16,7 +16,7 @@ class Object
   end
 end
 
-class Editor
+class UrlHandler
   attr_accessor :name
 
   def initialize name
@@ -27,6 +27,12 @@ class Editor
     "#{ENV['HOME']}/.local/share/applications/url-scheme-handler-#{name}.desktop"
   end
 
+  def open query
+    exec name, query
+  end
+end
+
+class Editor < UrlHandler
   def open query
     params = CGI::parse query
     if cmdline = params['url'].parse
@@ -76,6 +82,9 @@ ARGV.each do |arg|
   when 'subl'
     editor = Editor.new 'subl3'
     editor.send uri.host, uri.query
+  when 'takectrsxvp'
+    url_handler = UrlHandler.new 'takectrsxvp'
+    url_handler.open uri.to_s
   else
     raise ArgumentError, "URL '#{uri}' not supported"
   end
