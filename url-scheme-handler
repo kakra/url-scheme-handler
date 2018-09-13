@@ -44,10 +44,11 @@ class Editor
 end
 
 case ARGV[0]
-when '--help', '-h'
+when '--help', '-h', nil
   puts <<-USAGE
-Usage: $0 --install <handler> | --uninstall <handler> | --help
+Usage: #{$0} --install <handler> | --uninstall <handler> | --help
 USAGE
+  exit
 when '--install', '-i'
   scheme = ARGV[1].ensure
   File.open(Editor.new(scheme).launcher_location, 'w').write <<-DESKTOP
